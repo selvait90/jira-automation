@@ -3,17 +3,25 @@
 # like create, edit, assign, etc...
 from core import common
 
-def main(action, project):
+def main(action, project, ticket):
     if action == "list":
-        common.list_projects()
+        projects = common.list_projects()
+        for project in projects:
+            print project.key
+
     elif action == "create":
         if project != None:
             common.create_issue(project)
         else:
             print "ERROR : Please enter the project key"
+    elif action == "assign":
+        if ticket != None:
+            common.assgin_issue(ticket)
+        else:
+            print "ERROR : "
     
 if __name__ == "__main__":
     print "*** Welcome to JIRA Automation ***"
     args = common.process_args()
-    main(args['action'], args['project'])
+    main(args['action'], args['project'], args['ticket'])
     

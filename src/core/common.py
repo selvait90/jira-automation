@@ -38,8 +38,15 @@ def configure_jira():
 def list_projects():
     jira = configure_jira()
     projects = jira.projects()
-    for project in projects:
-        print project.key
+    return projects
+
+def assgin_issue(ticket):
+    user = "selvait90"
+    print "User : ", user,"Ticket : ", ticket
+    jira = configure_jira()
+    issue = jira.issue(ticket)
+    jira.assign_issue(issue, user)
+    
     
 def process_args():
     print "Inside pares_args"
@@ -56,7 +63,7 @@ def process_args():
                         )
     parser.add_argument('-a', '--action',
                         dest='action',
-                        choices=['list','create','update','close'],
+                        choices=['list','create','update','close','assign'],
                         help='type of action to perform',
                         required=True,
                         type=str,
