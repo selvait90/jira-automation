@@ -19,7 +19,9 @@ def main(action, project, ticket):
             common.assgin_issue(ticket)
         else:
             print "ERROR : "
-    
+    elif action == "comment":
+        if ticket != None:
+            common.add_comment(ticket)
 if __name__ == "__main__":
     print "*** Welcome to JIRA Automation ***"
     args = common.process_args()

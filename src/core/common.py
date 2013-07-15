@@ -41,13 +41,18 @@ def list_projects():
     return projects
 
 def assgin_issue(ticket):
-    user = "selvait90"
+    user = "selva"
     print "User : ", user,"Ticket : ", ticket
     jira = configure_jira()
     issue = jira.issue(ticket)
     jira.assign_issue(issue, user)
+    jira.add_watcher(issue, user)
     
-    
+def add_comment(ticket):
+    body = "I commented on ticket"
+    jira = configure_jira()
+    issue = jira.issue(ticket)
+    jira.add_comment(issue, body)    
 def process_args():
     print "Inside pares_args"
     import argparse
@@ -63,7 +68,7 @@ def process_args():
                         )
     parser.add_argument('-a', '--action',
                         dest='action',
-                        choices=['list','create','update','close','assign'],
+                        choices=['list','create','update','close','assign', 'comment'],
                         help='type of action to perform',
                         required=True,
                         type=str,
@@ -77,6 +82,12 @@ def process_args():
     parser.add_argument('-p', '--project',
                         dest='project',
                         help='key value of the project',
+                        required=False,
+                        type=str,
+                        )
+    parser.add_argument('-c', '--comment',
+                        dest='comment',
+                        help='Add a comment to ticket',
                         required=False,
                         type=str,
                         )
