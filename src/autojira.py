@@ -9,9 +9,9 @@ def main(action, project, ticket):
         for project in projects:
             print project.key
 
-    elif action == "create":
+    elif action == "template":
         if project != None:
-            common.create_issue(project)
+            common.create_template(project)
         else:
             print "ERROR : Please enter the project key"
     elif action == "assign":

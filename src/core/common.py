@@ -9,11 +9,67 @@ Created on Jul 4, 2013
 @author: Selvakumar Arumugam
 '''
 from jira.client import JIRA
+import cStringIO
 
 jira = JIRA()
-def create_issue(project):
+def create_issue():
+    print "Creating issue"
+
+def create_template(project):
     metadata = create_metadata(project)
     print metadata
+    print "##########"
+    print "ID | Issue Type"
+    count = 0
+    for issuetype in metadata['projects'][0]['issuetypes']:
+        print count," | ",issuetype['name']
+        count += 1
+    issuetypeid = int(raw_input("Choose Issue type by entering id :"))
+    #print issuetypeid, ":", issuetypes[issuetypeid]
+    template = cStringIO.StringIO()
+    try:
+        print "[DEFAULT]\n"
+        template.write('[DEFAULT]\n')
+        
+        issuedata = metadata['projects'][0]['issuetypes'][issuetypeid]['fields']
+        for field in issuedata:
+            if field == 'project':
+                print "# mandatory field"
+                print issuedata[field]['name']+"="+issuedata[field]['allowedValues'][0]['name']+"\n"
+            elif field == 'issuetype':
+                print "# mandatory field"
+                print issuedata[field]['name']+"="+issuedata[field]['allowedValues'][0]['name']+"\n"
+            else:
+                required = issuedata[field]['required']
+                if required:
+                    print "# mandatory field"
+                
+                if 'allowedValues' in issuedata[field].keys():
+                    #print "Len : ",len(issuedata[field]['allowedValues'])
+                    values = ""
+                    for val in issuedata[field]['allowedValues']:
+                        #print val['value']
+                        values += val['value']+","
+                    print "# values :",values
+                customtype = ""
+                if 'custom' in issuedata[field]['schema'].keys():
+                    customtype = issuedata[field]['schema']['custom']
+                    customtype = customtype.split(':')
+                    customtype = customtype[1]
+                    print "# data type :",issuedata[field]['schema']['type'],", UI type :",customtype
+                else:
+                    print "# data type :",issuedata[field]['schema']['type']
+                print "#",issuedata[field]['name']+"="+"\n"
+                #print field+"="+"\n"
+            #print type(field)
+            #print issuedata[field]
+#             if 'allowedValues' in issuedata[field].keys():
+#                 print field,"=",issuedata[field]['allowedValues'][0]['name']
+#             else:
+#                 print field
+                
+    except Exception as e:
+        print "ERROR : Please enter valid ID", e
 #     for meta in metadata:
 #         print meta.key
     """issue_dict = {'key' : 'DEV',
@@ -24,7 +80,7 @@ def create_issue(project):
     jira.create_issue(fields=issue_dict,)"""
     
 
-def create_metadata(projectKeys, projectIds=None, issuetypeIds=None, issuetypeNames='Bug', expand='projects'):
+def create_metadata(projectKeys, projectIds=None, issuetypeIds=None, issuetypeNames=None, expand='projects.issuetypes.fields'):
     jira = configure_jira()
     metadata = jira.createmeta(projectKeys, projectIds, issuetypeIds, issuetypeNames, expand)
     return metadata
@@ -68,7 +124,7 @@ def process_args():
                         )
     parser.add_argument('-a', '--action',
                         dest='action',
-                        choices=['list','create','update','close','assign', 'comment'],
+                        choices=['list','create','template','update','close','assign', 'comment'],
                         help='type of action to perform',
                         required=True,
                         type=str,
