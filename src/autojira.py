@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-# A tool which is interacts with JIRA REST API to perform operations on tickets
-# like create, edit, assign, etc...
+""" A tool which is interacts with JIRA REST API to perform operations on tickets
+ like create, edit, assign, etc..."""
 from core import common
 
-def main(action, project, ticket):
+def main(action, project, ticket, filename):
     if action == "list":
         projects = common.list_projects()
         for project in projects:
             print project.key
-
+    elif action == "create":
+        if file != None:
+            common.create_issue(filename)
     elif action == "template":
         if project != None:
             common.create_template(project)
@@ -25,5 +27,5 @@ def main(action, project, ticket):
 if __name__ == "__main__":
     print "*** Welcome to JIRA Automation ***"
     args = common.process_args()
-    main(args['action'], args['project'], args['ticket'])
+    main(args['action'], args['project'], args['ticket'], args['file'])
     

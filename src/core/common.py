@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# Collection of functions to work with JIRA tickets
+""" Collection of functions to work with JIRA tickets
 
-# gettext internationalisation function requisite:
+ gettext internationalisation function requisite:"""
 '''
 Created on Jul 4, 2013
 
@@ -10,10 +10,39 @@ Created on Jul 4, 2013
 '''
 from jira.client import JIRA
 import cStringIO
+import ConfigParser
 
 jira = JIRA()
-def create_issue():
+def create_issue(filename):
+    jira = configure_jira()
     print "Creating issue"
+    config = ConfigParser.RawConfigParser(allow_no_value=True)
+    config.read(filename)
+    issuefields = dict(config.defaults())
+    #print issuefields
+    dictfields={}
+    for ifield in issuefields:
+        if ifield == "project":
+            tempdict = {}
+            tempdict[issuefields[ifield].split(':')[0]] = issuefields[ifield].split(':')[1]
+            dictfields[ifield] = tempdict
+        elif ifield == "issuetype":
+            tempdict = {}
+            tempdict[issuefields[ifield].split(':')[0]] = issuefields[ifield].split(':')[1]
+            dictfields[ifield] = tempdict
+        else:
+            dictfields[ifield] = issuefields[ifield]
+#    print "DICT : ", dictfields
+    new_issue = jira.create_issue(dictfields)
+    #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary='Auto : Fourth ticket')
+    print new_issue
+
+    #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary="Auto : Second ticket",)
+    #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary="Auto : first ticket",)
+    #new_issue = jira.create_issue(issuefields)
+    #new_issue = jira.create_issue(fields=issuefields)
+    #print new_issue
+
 
 def create_template(project):
     metadata = create_metadata(project)
@@ -28,38 +57,49 @@ def create_template(project):
     #print issuetypeid, ":", issuetypes[issuetypeid]
     template = cStringIO.StringIO()
     try:
-        print "[DEFAULT]\n"
-        template.write('[DEFAULT]\n')
+        template.write('[DEFAULT]\n\n')
         
         issuedata = metadata['projects'][0]['issuetypes'][issuetypeid]['fields']
         for field in issuedata:
             if field == 'project':
-                print "# mandatory field"
-                print issuedata[field]['name']+"="+issuedata[field]['allowedValues'][0]['name']+"\n"
+                template.write('# mandatory field\n')
+                #fieldname = issuedata[field]['name']+"={'name': '"+issuedata[field]['allowedValues'][0]['name']+"'}\n\n"
+                fieldname = field+"=key:"+issuedata[field]['allowedValues'][0]['key']+"\n\n"
+                template.write(fieldname)
             elif field == 'issuetype':
-                print "# mandatory field"
-                print issuedata[field]['name']+"="+issuedata[field]['allowedValues'][0]['name']+"\n"
+                template.write('# mandatory field\n')
+                #fieldname = issuedata[field]['name']+"='name': '"+issuedata[field]['allowedValues'][0]['name']+"'}\n\n"
+                fieldname = field+"=name:"+issuedata[field]['allowedValues'][0]['name']+"\n\n"
+                template.write(fieldname)
             else:
                 required = issuedata[field]['required']
                 if required:
-                    print "# mandatory field"
-                
+                    template.write('# mandatory field\n')
                 if 'allowedValues' in issuedata[field].keys():
-                    #print "Len : ",len(issuedata[field]['allowedValues'])
                     values = ""
                     for val in issuedata[field]['allowedValues']:
-                        #print val['value']
                         values += val['value']+","
-                    print "# values :",values
+                    value = "# values : "+values+"\n"
+                    template.write(value)
                 customtype = ""
                 if 'custom' in issuedata[field]['schema'].keys():
                     customtype = issuedata[field]['schema']['custom']
                     customtype = customtype.split(':')
                     customtype = customtype[1]
-                    print "# data type :",issuedata[field]['schema']['type'],", UI type :",customtype
+                    datatypes = "# data type : "+issuedata[field]['schema']['type']+", UI type : "+customtype+"\n"
+                    template.write(datatypes)
                 else:
-                    print "# data type :",issuedata[field]['schema']['type']
-                print "#",issuedata[field]['name']+"="+"\n"
+                    datatypes = "# data type : "+issuedata[field]['schema']['type']+"\n"
+                    template.write(datatypes)
+                #fieldname = "# "+issuedata[field]['name']+"="+"\n\n"
+                fieldname = "# "+field+"="+"\n\n"
+                template.write(fieldname)
+                
+        print "#############################################"
+        temp = template.getvalue()
+        f = open('conf/CHANGE','w')
+        f.write(temp)
+        f.close()
                 #print field+"="+"\n"
             #print type(field)
             #print issuedata[field]
