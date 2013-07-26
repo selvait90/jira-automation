@@ -35,90 +35,88 @@ def create_issue(filename):
 #    print "DICT : ", dictfields
     new_issue = jira.create_issue(dictfields)
     #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary='Auto : Fourth ticket')
-    print new_issue
+    
+    print dir(new_issue)
+    print "Key :", new_issue.key
 
     #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary="Auto : Second ticket",)
     #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary="Auto : first ticket",)
     #new_issue = jira.create_issue(issuefields)
     #new_issue = jira.create_issue(fields=issuefields)
     #print new_issue
-
+def get_issuetype_id(metadata, project):
+    print "*** PROJECT : %s ***" % project
+    print "ID | Issue Type"
+    count = 0
+    metadata = create_metadata(project)
+    #print metadata
+    for issuetype in metadata['projects'][0]['issuetypes']:
+        #print count," | ",issuetype['name']
+        print "%s | %s" % (count, issuetype['name'])
+        count += 1
+    issuetypeid = int(raw_input("Choose IssueType by entering id :"))
+    return issuetypeid
 
 def create_template(project):
     metadata = create_metadata(project)
-    print metadata
-    print "##########"
-    print "ID | Issue Type"
-    count = 0
-    for issuetype in metadata['projects'][0]['issuetypes']:
-        print count," | ",issuetype['name']
-        count += 1
-    issuetypeid = int(raw_input("Choose Issue type by entering id :"))
-    #print issuetypeid, ":", issuetypes[issuetypeid]
+    issuetypeid = get_issuetype_id(metadata, project)
     template = cStringIO.StringIO()
     try:
-        template.write('[DEFAULT]\n\n')
-        
         issuedata = metadata['projects'][0]['issuetypes'][issuetypeid]['fields']
+        print issuedata
         for field in issuedata:
             if field == 'project':
-                template.write('# mandatory field\n')
-                #fieldname = issuedata[field]['name']+"={'name': '"+issuedata[field]['allowedValues'][0]['name']+"'}\n\n"
-                fieldname = field+"=key:"+issuedata[field]['allowedValues'][0]['key']+"\n\n"
+                template.write('[project]\n')
+                template.write('mandatory=True\n')
+                fieldname = "%s=key:%s\n\n" % (field, issuedata[field]['allowedValues'][0]['key'])
                 template.write(fieldname)
             elif field == 'issuetype':
-                template.write('# mandatory field\n')
-                #fieldname = issuedata[field]['name']+"='name': '"+issuedata[field]['allowedValues'][0]['name']+"'}\n\n"
-                fieldname = field+"=name:"+issuedata[field]['allowedValues'][0]['name']+"\n\n"
+                template.write('[issuetype]\n')
+                template.write('mandatory=True\n')
+                fieldname = "%s=name:%s\n\n" % (field, issuedata[field]['allowedValues'][0]['name'])
                 template.write(fieldname)
             else:
-                required = issuedata[field]['required']
-                if required:
-                    template.write('# mandatory field\n')
+                fieldname = "[%s]\n" % field
+                template.write(fieldname)
+                fieldname = "# Field : %s\n" % issuedata[field]['name']
+                template.write(fieldname)
+                # listing the possible values of the field
                 if 'allowedValues' in issuedata[field].keys():
                     values = ""
                     for val in issuedata[field]['allowedValues']:
                         values += val['value']+","
-                    value = "# values : "+values+"\n"
+                    value = "# values : %s\n" % values
                     template.write(value)
-                customtype = ""
+                # datatype of the field/custom field and jira UI type of custom field 
+                datatypes = "datatype="+issuedata[field]['schema']['type']+"\n"
+                template.write(datatypes)
                 if 'custom' in issuedata[field]['schema'].keys():
                     customtype = issuedata[field]['schema']['custom']
                     customtype = customtype.split(':')
                     customtype = customtype[1]
-                    datatypes = "# data type : "+issuedata[field]['schema']['type']+", UI type : "+customtype+"\n"
+                    datatypes = "jiratype=%s\n" % customtype
                     template.write(datatypes)
+                # listing field mandatory status
+                required = issuedata[field]['required']
+                hashsymbol = "# "
+                if required:
+                    template.write('mandatory=True\n')
+                    hashsymbol=""
                 else:
-                    datatypes = "# data type : "+issuedata[field]['schema']['type']+"\n"
-                    template.write(datatypes)
-                #fieldname = "# "+issuedata[field]['name']+"="+"\n\n"
-                fieldname = "# "+field+"="+"\n\n"
+                    template.write('mandatory=False\n')
+                fieldname = "%s%s=\n" % (hashsymbol, field)
                 template.write(fieldname)
+                
+                template.write("\n")
                 
         print "#############################################"
         temp = template.getvalue()
-        f = open('conf/CHANGE','w')
+        f = open('templates/CHANGE','w')
         f.write(temp)
         f.close()
-                #print field+"="+"\n"
-            #print type(field)
-            #print issuedata[field]
-#             if 'allowedValues' in issuedata[field].keys():
-#                 print field,"=",issuedata[field]['allowedValues'][0]['name']
-#             else:
-#                 print field
-                
     except Exception as e:
         print "ERROR : Please enter valid ID", e
-#     for meta in metadata:
-#         print meta.key
-    """issue_dict = {'key' : 'DEV',
-                 'summary' : 'Creating Issue from Code',
-                                  
-                 
-                 }
-    jira.create_issue(fields=issue_dict,)"""
-    
+
 
 def create_metadata(projectKeys, projectIds=None, issuetypeIds=None, issuetypeNames=None, expand='projects.issuetypes.fields'):
     jira = configure_jira()
@@ -137,6 +135,9 @@ def list_projects():
     return projects
 
 def assgin_issue(ticket):
+    '''
+    Assigns the tickets to a user
+    '''
     user = "selva"
     print "User : ", user,"Ticket : ", ticket
     jira = configure_jira()
