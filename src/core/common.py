@@ -15,6 +15,89 @@ import ConfigParser
 jira = JIRA()
 def create_issue(filename):
     jira = configure_jira()
+    issueFields = {}
+    print "Creating issue"
+    config = ConfigParser.RawConfigParser(allow_no_value=True)
+    config.read(filename)
+    for section in config.sections():
+        print "*** %s ***" % section
+        if config.has_option(section, section):
+            #print config.get(section, section)
+            options = create_section_dict(config.items(section))
+            #print options
+            value = format_element(section, options)
+            issueFields[section] = value
+        else:
+            mandatory = config.get(section, 'mandatory')
+            print "# ",mandatory, section
+            if mandatory == 'True':
+                print "section is mandatory field"
+    print issueFields
+    new_issue = jira.create_issue(issueFields)
+    print repr(new_issue)
+def format_element(section, options):
+    if 'project' in options.keys():
+        valuedict = {}
+        value = options[section]
+        valuedict[value.split(':')[0]] = value.split(':')[1]
+        return valuedict
+    elif 'issuetype' in options.keys():
+        valuedict = {}
+        value = options[section]
+        valuedict[value.split(':')[0]] = value.split(':')[1]
+        return valuedict
+    else:
+        valuedict = {}
+        if 'jiratype' in options.keys():
+            if options['jiratype'] == 'radiobuttons':
+                key = 'value'
+                value = options[section]
+                valuedict[key]=value
+                return valuedict
+            elif options['jiratype'] == 'multicheckboxes':
+                valuearray = []
+                key = 'value'
+                value = options[section].split(',')
+                for val in value:
+                    valuedict[key] = val
+                    valuearray.append(valuedict)
+                    valuedict = {}
+                return valuearray
+            elif options['jiratype'] == 'select':
+                key = 'value'
+                value = options[section]
+                valuedict[key]=value
+                return valuedict
+            elif options['jiratype'] == 'cascadingselect':
+                key = 'value'
+                childdict = {}
+                (parent, child) = options[section].split(':')
+                childdict[key] = child
+                valuedict[key] = parent
+                valuedict['child'] = childdict
+                return valuedict
+            elif options['jiratype'] == 'datetime':
+                return options[section]
+            else:
+                return options[section]
+            print "Custom Field"
+        else:
+            print options['datatype']               
+            return options[section] 
+        
+def create_section_dict(items):
+    '''
+    Load options of a section into dictionary
+    '''
+    options = {}
+    for pair in items:
+        options[pair[0]] = pair[1]
+    return options
+        
+    
+        
+def create_issue_old(filename):
+    jira = configure_jira()
     print "Creating issue"
     config = ConfigParser.RawConfigParser(allow_no_value=True)
     config.read(filename)
@@ -36,7 +119,7 @@ def create_issue(filename):
     new_issue = jira.create_issue(dictfields)
     #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary='Auto : Fourth ticket')
     
-    print dir(new_issue)
+    print repr(new_issue)
     print "Key :", new_issue.key
 
     #new_issue = jira.create_issue(project={'key': 'CHANGE'},issuetype={'name': 'Production Change'},summary="Auto : Second ticket",)
@@ -83,8 +166,21 @@ def create_template(project):
                 # listing the possible values of the field
                 if 'allowedValues' in issuedata[field].keys():
                     values = ""
+                    children=False
+                    if 'custom' in issuedata[field]['schema'].keys():
+                        customtype = issuedata[field]['schema']['custom']
+                        if 'cascadingselect' in customtype:
+                            children = True
                     for val in issuedata[field]['allowedValues']:
-                        values += val['value']+","
+                        if children is True:
+                            allchild=""
+                            for child in val['children']:
+                                allchild +=child['value']+","
+                                #print child
+                            print "All :"+allchild
+                            values += "Parent:Children-"+val['value']+":"+allchild+" | "
+                        else:
+                            values += val['value']+","
                     value = "# values : %s\n" % values
                     template.write(value)
                 # datatype of the field/custom field and jira UI type of custom field 
@@ -151,7 +247,7 @@ def add_comment(ticket):
     issue = jira.issue(ticket)
     jira.add_comment(issue, body)    
 def process_args():
-    print "Inside pares_args"
+    # print "Inside pares_args"
     import argparse
     parser = argparse.ArgumentParser(
                                      description='Manage JIRA tickets in a quick manner',
