@@ -24,6 +24,7 @@ def main(action, project, ticket, filename, comment):
     elif action == "comment":
         if ticket != None:
             common.add_comment(ticket, comment)
+            
 if __name__ == "__main__":
     print "*** Welcome to JIRA Automation ***"
     args = common.process_args()

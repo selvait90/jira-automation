@@ -121,8 +121,7 @@ def create_metadata(projectKeys, projectIds=None, issuetypeIds=None, issuetypeNa
     return metadata
 
 def configure_jira():
-    config = ConfigParser.RawConfigParser(allow_no_value=True)
-    config.read('templates/global')
+    config = get_global_config()
     server = config.get('jira', 'server')
     user = config.get('jira', 'user')
     passwd = config.get('jira', 'passwd')
@@ -130,4 +129,7 @@ def configure_jira():
     #jira = JIRA(options={'sever' : sever}, basic_auth=None, oauth=None)
     jira = JIRA(options={'server': server}, basic_auth=(user, passwd), oauth=None)
     return jira
-
+def get_global_config():
+    config = ConfigParser.RawConfigParser(allow_no_value=True)
+    config.read('templates/global')
+    return config

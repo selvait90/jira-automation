@@ -11,11 +11,14 @@ Created on Jul 4, 2013
 from jira.client import JIRA
 import cStringIO
 import ConfigParser
-from utils import *
+import helper
+import sys
+import logging
+
 
 jira = JIRA()
 def create_issue(filename):
-    jira = configure_jira()
+    jira = helper.configure_jira()
     issueFields = {}
     print "Creating issue"
     config = ConfigParser.RawConfigParser(allow_no_value=True)
@@ -24,22 +27,33 @@ def create_issue(filename):
         print "*** %s ***" % section
         if config.has_option(section, section):
             #print config.get(section, section)
-            options = create_section_dict(config.items(section))
-            #print options
-            value = format_element(section, options)
-            issueFields[section] = value
+            options = helper.create_section_dict(config.items(section))
+            if options[section]:
+                value = helper.format_element(section, options)
+                issueFields[section] = value
+            elif options['mandatory'] == 'True':
+                errorMsg = "ERROR : %s mandatory field is empty, check %s" % (section, filename)
+                try:
+                    raise CustomException(errorMsg)
+                except CustomException, e:
+                    print e
+                    sys.exit(1)
         else:
             mandatory = config.get(section, 'mandatory')
-            print "# ",mandatory, section
             if mandatory == 'True':
-                print "section is mandatory field"
+                errorMsg = "ERROR : %s mandatory field is not defined, check %s" % (section, filename)
+                try:
+                    raise CustomException(errorMsg)
+                except CustomException, e:
+                    print e
+                    sys.exit(1)
     print issueFields
     new_issue = jira.create_issue(issueFields)
     print repr(new_issue)
 
 def create_template(project):
-    metadata = create_metadata(project)
-    issuetypeid = get_issuetype_id(metadata, project)
+    metadata = helper.create_metadata(project)
+    issuetypeid = helper.get_issuetype_id(metadata, project)
     template = cStringIO.StringIO()
     try:
         issuedata = metadata['projects'][0]['issuetypes'][issuetypeid]['fields']
@@ -113,7 +127,7 @@ def create_template(project):
 
 
 def list_projects():
-    jira = configure_jira()
+    jira = helper.configure_jira()
     projects = jira.projects()
     return projects
 
@@ -121,19 +135,30 @@ def assgin_issue(ticket):
     '''
     Assigns the tickets to a user
     '''
-    user = "selva"
+    config = helper.get_global_config()
+    user = config.get('jira','user')
     print "User : ", user,"Ticket : ", ticket
-    jira = configure_jira()
-    issue = jira.issue(ticket)
-    jira.assign_issue(issue, user)
-    jira.add_watcher(issue, user)
+    jira = helper.configure_jira()
+    try :
+        issue = jira.issue(ticket)
+        jira.assign_issue(issue, user)
+        jira.add_watcher(issue, user)
+    except Exception, e:
+        print "Error : %s" % e
+    
+    
     
 def add_comment(ticket, comment):
     if comment:
         body = comment
-        jira = configure_jira()
-        issue = jira.issue(ticket)
-        jira.add_comment(issue, body)
+        jira = helper.configure_jira()
+        try :
+            user = helper.get_global_config().get('jira','user')
+            issue = jira.issue(ticket)
+            jira.add_comment(issue, body)
+            jira.add_watcher(issue, user)
+        except Exception, e:
+            print "Error : %s" % e
     else:
         print "Please provide the comment"    
 def process_args():
@@ -177,3 +202,5 @@ def process_args():
     args = vars(parser.parse_args())
     return args
  
+class CustomException(Exception):
+    pass

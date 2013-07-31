@@ -1,0 +1,6 @@
+[jira]
+user=selva
+passwd=selva
+server=http://localhost:8100
+
+[fields]
