@@ -3,7 +3,7 @@
  like create, edit, assign, etc..."""
 from core import common
 
-def main(action, project, ticket, filename):
+def main(action, project, ticket, filename, comment):
     if action == "list":
         projects = common.list_projects()
         for project in projects:
@@ -23,9 +23,9 @@ def main(action, project, ticket, filename):
             print "ERROR : "
     elif action == "comment":
         if ticket != None:
-            common.add_comment(ticket)
+            common.add_comment(ticket, comment)
 if __name__ == "__main__":
     print "*** Welcome to JIRA Automation ***"
     args = common.process_args()
-    main(args['action'], args['project'], args['ticket'], args['file'])
+    main(args['action'], args['project'], args['ticket'], args['file'], args['comment'])
     
