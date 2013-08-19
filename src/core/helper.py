@@ -7,17 +7,21 @@ supports functions of common.py
 from jira.client import JIRA
 
 import ConfigParser
+import logging
 
 def format_element(section, options):
+    logging.debug('Constructing the field %s and it value %s')
     if 'project' in options.keys():
         valuedict = {}
         value = options[section]
         valuedict[value.split(':')[0]] = value.split(':')[1]
+        logging.debug('Constructed field value - %s : %s' % (section, valuedict))
         return valuedict
     elif 'issuetype' in options.keys():
         valuedict = {}
         value = options[section]
         valuedict[value.split(':')[0]] = value.split(':')[1]
+        logging.debug('Constructed field value - %s : %s' % (section, valuedict))
         return valuedict
     else:
         valuedict = {}
@@ -26,6 +30,7 @@ def format_element(section, options):
                 key = 'value'
                 value = options[section]
                 valuedict[key]=value
+                logging.debug('Constructed field value - %s : %s' % (section, valuedict))
                 return valuedict
             elif options['jiratype'] == 'multicheckboxes':
                 valuearray = []
@@ -35,11 +40,13 @@ def format_element(section, options):
                     valuedict[key] = val
                     valuearray.append(valuedict)
                     valuedict = {}
+                logging.debug('Constructed field value - %s : %s' % (section, valuedict))
                 return valuearray
             elif options['jiratype'] == 'select':
                 key = 'value'
                 value = options[section]
                 valuedict[key]=value
+                logging.debug('Constructed field value - %s : %s' % (section, valuedict))
                 return valuedict
             elif options['jiratype'] == 'cascadingselect':
                 key = 'value'
@@ -48,16 +55,18 @@ def format_element(section, options):
                 childdict[key] = child
                 valuedict[key] = parent
                 valuedict['child'] = childdict
+                logging.debug('Constructed field value - %s : %s' % (section, valuedict))
                 return valuedict
             elif options['jiratype'] == 'datetime':
                 (date, time) = options[section].split()
                 value = date+"T"+time+".0-0500"
+                logging.debug('Constructed field value - %s : %s' % (section, valuedict))
                 return value
             else:
+                logging.debug('Constructed field value - %s : %s' % (section, valuedict))
                 return options[section]
-            print "Custom Field"
         else:
-            print options['datatype']               
+            logging.debug('Constructed field value - %s : %s' % (section, valuedict))               
             return options[section] 
         
 def create_section_dict(items):
@@ -67,13 +76,11 @@ def create_section_dict(items):
     options = {}
     for pair in items:
         options[pair[0]] = pair[1]
+        logging.debug(" constructing dict of config sections : %s" % options)
     return options
-        
-    
         
 def create_issue_old(filename):
     jira = configure_jira()
-    print "Creating issue"
     config = ConfigParser.RawConfigParser(allow_no_value=True)
     config.read(filename)
     issuefields = dict(config.defaults())
@@ -104,7 +111,9 @@ def create_issue_old(filename):
     #print new_issue
 def get_issuetype_id(metadata, project):
     print "*** PROJECT : %s ***" % project
+    logging.debug("*** PROJECT : %s ***" % project)
     print "ID | Issue Type"
+    logging.debug("ID | Issue Type")
     count = 0
     metadata = create_metadata(project)
     #print metadata

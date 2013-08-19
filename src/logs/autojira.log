@@ -1,0 +1,30 @@
+INFO:root:*** Creating Issue Initiated ***
+DEBUG:root:Create Issue template templates/CHANGE 
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): localhost
+DEBUG:requests.packages.urllib3.connectionpool:"POST /rest/api/2/issue HTTP/1.1" 201 None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /rest/api/2/issue/CHANGE-29 HTTP/1.1" 200 None
+INFO:root:*** Creating Issue Completed ***
+2013-07-31 19:21:35,115 INFO *** Creating Issue Initiated ***
+2013-07-31 19:21:35,115 DEBUG Create Issue template templates/CHANGE 
+2013-07-31 19:21:35,122 INFO Starting new HTTP connection (1): localhost
+2013-07-31 19:21:35,401 DEBUG "POST /rest/api/2/issue HTTP/1.1" 201 None
+2013-07-31 19:21:35,472 DEBUG "GET /rest/api/2/issue/CHANGE-30 HTTP/1.1" 200 None
+2013-07-31 19:21:35,489 INFO *** Creating Issue Completed ***
+[ 31/07/2013 19:25:02 ] INFO *** Creating Issue Initiated ***
+[ 31/07/2013 19:25:02 ] DEBUG Create Issue template templates/CHANGE 
+[ 31/07/2013 19:25:02 ] INFO Starting new HTTP connection (1): localhost
+[ 31/07/2013 19:25:03 ] DEBUG "POST /rest/api/2/issue HTTP/1.1" 201 None
+[ 31/07/2013 19:25:03 ] DEBUG "GET /rest/api/2/issue/CHANGE-31 HTTP/1.1" 200 None
+[ 31/07/2013 19:25:03 ] INFO *** Creating Issue Completed ***
+[ 2013-07-31 19:25:56 ] INFO *** Creating Issue Initiated ***
+[ 2013-07-31 19:25:56 ] DEBUG Create Issue template templates/CHANGE 
+[ 2013-07-31 19:25:56 ] INFO Starting new HTTP connection (1): localhost
+[ 2013-07-31 19:25:56 ] DEBUG "POST /rest/api/2/issue HTTP/1.1" 201 None
+[ 2013-07-31 19:25:56 ] DEBUG "GET /rest/api/2/issue/CHANGE-32 HTTP/1.1" 200 None
+[ 2013-07-31 19:25:56 ] INFO *** Creating Issue Completed ***
+[ 2013-07-31 19:26:33 ] INFO : *** Creating Issue Initiated ***
+[ 2013-07-31 19:26:33 ] DEBUG : Create Issue template templates/CHANGE 
+[ 2013-07-31 19:26:33 ] INFO : Starting new HTTP connection (1): localhost
+[ 2013-07-31 19:26:33 ] DEBUG : "POST /rest/api/2/issue HTTP/1.1" 201 None
+[ 2013-07-31 19:26:33 ] DEBUG : "GET /rest/api/2/issue/CHANGE-33 HTTP/1.1" 200 None
+[ 2013-07-31 19:26:33 ] INFO : *** Creating Issue Completed ***

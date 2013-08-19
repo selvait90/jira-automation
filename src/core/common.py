@@ -15,16 +15,17 @@ import helper
 import sys
 import logging
 
-
 jira = JIRA()
 def create_issue(filename):
     jira = helper.configure_jira()
     issueFields = {}
-    print "Creating issue"
+    #print "Creating issue"
+    logging.info('*** Create Issue Initiated ***')
+    logging.debug('Create Issue template is %s ', filename)
     config = ConfigParser.RawConfigParser(allow_no_value=True)
     config.read(filename)
     for section in config.sections():
-        print "*** %s ***" % section
+        logging.debug("*** Processing Field %s ***" % section)
         if config.has_option(section, section):
             #print config.get(section, section)
             options = helper.create_section_dict(config.items(section))
@@ -32,26 +33,28 @@ def create_issue(filename):
                 value = helper.format_element(section, options)
                 issueFields[section] = value
             elif options['mandatory'] == 'True':
-                errorMsg = "ERROR : %s mandatory field is empty, check %s" % (section, filename)
+                errorMsg = "%s mandatory field is empty, check %s" % (section, filename)
                 try:
                     raise CustomException(errorMsg)
                 except CustomException, e:
-                    print e
+                    logging.error(e)
                     sys.exit(1)
         else:
             mandatory = config.get(section, 'mandatory')
             if mandatory == 'True':
-                errorMsg = "ERROR : %s mandatory field is not defined, check %s" % (section, filename)
+                errorMsg = "%s mandatory field is not defined, check %s" % (section, filename)
                 try:
                     raise CustomException(errorMsg)
                 except CustomException, e:
-                    print e
+                    logging.error(e)
                     sys.exit(1)
-    print issueFields
+    logging.debug('create issue fields dictionary %s' % issueFields)
     new_issue = jira.create_issue(issueFields)
     print repr(new_issue)
+    logging.info('*** Create Issue Completed ***')
 
 def create_template(project):
+    logging.info('*** Create Issue Template Initiated ***')
     metadata = helper.create_metadata(project)
     issuetypeid = helper.get_issuetype_id(metadata, project)
     template = cStringIO.StringIO()
@@ -116,39 +119,45 @@ def create_template(project):
                 
                 template.write("\n")
                 
-        print "#############################################"
+        #print "#############################################"
         temp = template.getvalue()
         f = open('templates/CHANGE','w')
         f.write(temp)
         f.close()
     except Exception as e:
-        print "ERROR : Please enter valid ID", e
+        logging.error(e)
+    logging.info('*** Create Issue Template Completed ***')
 
 
 
 def list_projects():
+    logging.info('*** List the Projects Initiated ***')
     jira = helper.configure_jira()
     projects = jira.projects()
+    logging.info('*** List the Projects Completed ***')
     return projects
 
 def assgin_issue(ticket):
     '''
     Assigns the tickets to a user
     '''
+    logging.info('*** Assign the ticket Initiated ***')
     config = helper.get_global_config()
     user = config.get('jira','user')
+    logging.info('User :%s and Ticket %s ' % (user, ticket))
     print "User : ", user,"Ticket : ", ticket
     jira = helper.configure_jira()
     try :
         issue = jira.issue(ticket)
         jira.assign_issue(issue, user)
         jira.add_watcher(issue, user)
+        logging.info('*** Watcher Enabled ***')
     except Exception, e:
-        print "Error : %s" % e
-    
-    
+        logging.error(e)
+    logging.info('*** Assign the ticket Completed ***')
     
 def add_comment(ticket, comment):
+    logging.info('*** Comment on ticket Initiated ***')
     if comment:
         body = comment
         jira = helper.configure_jira()
@@ -157,12 +166,27 @@ def add_comment(ticket, comment):
             issue = jira.issue(ticket)
             jira.add_comment(issue, body)
             jira.add_watcher(issue, user)
+            logging.info('*** Watcher Enabled ***')
         except Exception, e:
-            print "Error : %s" % e
+            logging.error(e)
     else:
-        print "Please provide the comment"    
+        logging.error('comment value is expected')
+        sys.exit(1)    
+    logging.info('*** Comment on ticket Completed ***')
+def add_watcher(ticket, user):
+    logging.info('*** Enable watcher Initiated ***')
+    if not user:
+        user = helper.get_global_config().get('jira','user')
+    jira = helper.configure_jira()
+    try :
+        issue = jira.issue(ticket)
+        jira.add_watcher(issue, user)
+    except Exception, e:
+        logging.error(e)
+    logging.info('*** Enable watcher Completed ***')
+    
 def process_args():
-    # print "Inside pares_args"
+    logging.info('*** Parse the logs Initiated ***')
     import argparse
     parser = argparse.ArgumentParser(
                                      description='Manage JIRA tickets in a quick manner',
@@ -200,6 +224,7 @@ def process_args():
                         type=str,
                         )
     args = vars(parser.parse_args())
+    logging.info("*** Argument parsing completed ***")
     return args
  
 class CustomException(Exception):
