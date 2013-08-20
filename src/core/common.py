@@ -1,13 +1,22 @@
 #!/usr/bin/env python
+"""
+This file is part of autojira.
+Copyright (C)2013 Selvakumar Arumugam <selvait90@gmail.com>
 
-""" Collection of functions to work with JIRA tickets
+autojira is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
- gettext internationalisation function requisite:"""
-'''
-Created on Jul 4, 2013
+autojira is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-@author: Selvakumar Arumugam
-'''
+You should have received a copy of the GNU General Public License
+along with autojira.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 from jira.client import JIRA
 import cStringIO
 import ConfigParser
@@ -15,6 +24,9 @@ import helper
 import sys
 import logging
 
+""" Collection of functions to work with JIRA tickets
+ gettext internationalisation function requisite:
+"""
 jira = JIRA()
 def create_issue(filename):
     jira = helper.configure_jira()
