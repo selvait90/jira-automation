@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """
+autojira is python tool to interact with JIRA
 This file is part of autojira.
 Copyright (C)2013 Selvakumar Arumugam <selvait90@gmail.com>
 

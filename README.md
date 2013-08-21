@@ -1,27 +1,57 @@
-jira-automation-docs
-====================
+Introduction
+============
 
-User Documentation
-------------------
-# list of projects in JIRA
+autojira is python tool which helps to interact with JIRA tickets 
+and automates the operations to make life easier. 
+
+See the wiki documentation for detailed information
+https://github.com/selvait90/jira-automation/wiki
+
+License 
+=======
+autojira is python tool to interact with JIRA 
+Copyright (C)2013 Selvakumar Arumugam <selvait90@gmail.com>
+
+autojira is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+autojira is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with autojira.  If not, see <http://www.gnu.org/licenses/>.
+
+Syntax and Sample Commands
+==========================
+
+list of projects in JIRA
+------------------------
 ./autojira.py -a list
 
-# assign the ticket to me
+assign the ticket to me
+------------------------
 ./autojira.py -a assign -t <issue_id>
 Example :
 ./autojira.py -a assign -t DEV-01
 
-# comment on the ticket
+comment on the ticket
+---------------------
 ./autojira.py -a comment -t <issue_id> -c "<your comment>"
 Example :
 ./autojira.py -a comment -t DEV-01 -c "I commented on ticket"
 
-# generate template file to create new issue
+generate template file to create new issue
+------------------------------------------
 ./autojira.py -a template -p <project_key>
 Example :
 ./autojira.py -a template -p DEV
 
-# create new issue
+create new issue
+----------------
 ./autojira.py -a create -i conf/<project_key>-<issue_type>
 Example :
 ./autojira.py -a create -i conf/DEV-Bug
