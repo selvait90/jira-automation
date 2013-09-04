@@ -35,23 +35,23 @@ list of projects in JIRA
 assign the ticket to me
 ------------------------
 ./autojira.py -a assign -t &lt;issue_id>
-Example :
+
 ./autojira.py -a assign -t DEV-01
 
 comment on the ticket
 ---------------------
 ./autojira.py -a comment -t &lt;issue_id> -c "your comment"
-Example :
+
 ./autojira.py -a comment -t DEV-01 -c "I commented on ticket"
 
 generate template file to create new issue
 ------------------------------------------
 ./autojira.py -a template -p &lt;project_key>
-Example :
+
 ./autojira.py -a template -p DEV
 
 create new issue
 ----------------
 ./autojira.py -a create -i conf/&lt;template-filename>
-Example :
+
 ./autojira.py -a create -i conf/DEV-Bug
