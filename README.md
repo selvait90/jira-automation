@@ -25,6 +25,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with autojira.  If not, see &lt;http://www.gnu.org/licenses/>.
 
+Pre-requisites
+==============
+python modules :
+jira-python
+argparse
+
 Syntax and Sample Commands
 ==========================
 
